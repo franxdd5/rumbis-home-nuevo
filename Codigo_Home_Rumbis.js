@@ -1,6 +1,10 @@
 /* ================================================================
-   RUMBIS · HOME COMPLETO · v2.2
+   RUMBIS · HOME COMPLETO · v2.4
    ----------------------------------------------------------------
+   v2.4: fotos nuevas de las 6 categorías (animales, formato 3:4).
+   v2.3: las fotos de productos se leen en alta (antes tomaba la
+   miniatura borrosa que Tiendanube usa mientras carga) y las fotos
+   de categorías de Cloudinary se recortan solas a 3:4 y se optimizan.
    v2.2: "Rumbis en movimiento" pasa a ser un carrusel INFINITO con
    12 videos de Cloudinary, siempre en silencio y en loop. Se puede
    arrastrar, tiene botón de pausa y solo reproduce lo que está en
@@ -30,9 +34,9 @@
    solo. Si un carrusel no encuentra productos, no se dibuja.
 
    DONDE SE PEGA
-   Se sube a tu GitHub (franxdd5/rumbis-home) y se llama desde tu
-   etiqueta de Google Tag Manager (GTM-PJ5Z8TBQ) por jsDelivr:
-   https://cdn.jsdelivr.net/gh/franxdd5/rumbis-home@main/Codigo_Home_Rumbis.js
+   Se sube a tu GitHub (franxdd5/rumbis-home-nuevo) y se llama desde
+   tu etiqueta de Google Tag Manager (GTM-PJ5Z8TBQ) por jsDelivr:
+   https://cdn.jsdelivr.net/gh/franxdd5/rumbis-home-nuevo@main/Codigo_Home_Rumbis.js
 
    SEGURIDAD
    · Solo se activa en la home. En producto, categoria o carrito no
@@ -146,12 +150,12 @@
       titulo: "Elegí por <em>dónde empezar</em>",
       sub: "Seis mundos, un mismo criterio: que aguante el uso diario.",
       items: [
-        { nombre: "Paseos y Viajes", sub: "Arneses, correas, collares y transportadoras", url: "/paseos-y-viajes/", img: "https://i.ibb.co/cS2CvFC1/2.webp" },
-        { nombre: "Juguetes", sub: "Sogas, pelotas, interactivos y peluches", url: "/juguetes/", img: "https://i.ibb.co/nMPxwNTc/3.webp" },
-        { nombre: "Salud e Higiene", sub: "Pipetas, cepillos, dental y paños", url: "/salud-e-higiene/", img: "https://i.ibb.co/j7nVX48/4.webp" },
-        { nombre: "Snacks", sub: "Entrenamiento, dentales, huesos y húmedos", url: "/snacks/", img: "https://i.ibb.co/jtxn9Gs/5.webp" },
-        { nombre: "Accesorios", sub: "Camas, mantas, comederos y bebederos", url: "/accesorios/", img: "https://i.ibb.co/V0bvrHRZ/1-11-37-26-p-m.webp" },
-        { nombre: "Cursos", sub: "Capacitaciones para entender a tu perro", url: "/cursos-capacitaciones/", img: "https://i.ibb.co/xKcGxcFp/2-11-37-26-p-m.webp" }
+        { nombre: "Paseos y Viajes", sub: "Arneses, correas, collares y transportadoras", url: "/paseos-y-viajes/", img: "https://i.ibb.co/DPZ7bz9p/Dog-wearing-harness-sitting-outd-20260928212825-1.jpg" },
+        { nombre: "Juguetes", sub: "Sogas, pelotas, interactivos y peluches", url: "/juguetes/", img: "https://i.ibb.co/Q7sH8s2t/Golden-retriever-puppy-chewing-toy-20260928212831-1.jpg" },
+        { nombre: "Salud e Higiene", sub: "Pipetas, cepillos, dental y paños", url: "/salud-e-higiene/", img: "https://i.ibb.co/JwkLv76f/Dog-wrapped-in-towel-20260928212837-1.jpg" },
+        { nombre: "Snacks", sub: "Entrenamiento, dentales, huesos y húmedos", url: "/snacks/", img: "https://i.ibb.co/vvQdYrcB/Border-Collie-balancing-biscuit-20260928212846-1.jpg" },
+        { nombre: "Accesorios", sub: "Camas, mantas, comederos y bebederos", url: "/accesorios/", img: "https://i.ibb.co/v4v5LDhz/Senior-Labrador-sleeping-in-bed-20260928212851-1.jpg" },
+        { nombre: "Cursos", sub: "Capacitaciones para entender a tu perro", url: "/cursos-capacitaciones/", img: "https://i.ibb.co/Xrk4DbkD/Dog-sitting-in-park-20260928212857-1.jpg" }
       ]
     },
 
@@ -405,10 +409,17 @@
     return h;
   }
   /* Foto con red de seguridad: si la imagen no carga, queda la placa */
-  function foto(src, alt, i, clase) {
+  function foto(src, alt, i, clase, ex) {
     var n = String((i || 0) + 1); if (n.length < 2) n = "0" + n;
     var h = '<span class="rh-img ' + (clase || "") + '" data-n="' + n + '">';
-    if (src) h += '<img src="' + esc(src) + '" alt="' + esc(alt || "") + '" loading="lazy" decoding="async" onerror="this.style.display=\'none\'">';
+    /* ex (opcional): set = versiones de distintos tamaños, fb = foto de
+       respaldo si la principal no carga, sizes = ancho en pantalla */
+    if (src) h += '<img src="' + esc(src) + '"' +
+      (ex && ex.set ? ' srcset="' + esc(ex.set) + '" sizes="' + esc(ex.sizes || "100vw") + '"' : "") +
+      (ex && ex.fb ? ' data-fb="' + esc(ex.fb) + '"' : "") +
+      ' alt="' + esc(alt || "") + '" loading="lazy" decoding="async" onerror="' +
+      "var f=this.getAttribute('data-fb');if(f){this.removeAttribute('data-fb');this.removeAttribute('srcset');this.src=f}else{this.style.display='none'}" +
+      '">';
     return h + "</span>";
   }
   var ICO = {
@@ -1116,7 +1127,7 @@
   function secCats() {
     var c = CFG.categorias;
     var g = (c.items || []).map(function (x, i) {
-      return '<a class="rh-cat rh-rv" href="' + esc(x.url) + '">' + foto(x.img, x.nombre, i) +
+      return '<a class="rh-cat rh-rv" href="' + esc(x.url) + '">' + foto(cldFoto(x.img, "3:4", 900), x.nombre, i, "", { fb: cldFoto(x.img) !== x.img ? x.img : "" }) +
         '<span class="ct-tx"><b>' + esc(x.nombre) + "</b><span>" + esc(x.sub) + "</span>" +
         "<i>VER MÁS " + svg(FLECHA, 13) + "</i></span></a>";
     }).join("");
@@ -1130,7 +1141,7 @@
     return '<article class="rh-prod">' +
       '<a href="' + esc(x.url) + '" style="position:relative;display:block">' +
         (x.badge ? '<span class="rh-badge">' + esc(x.badge) + "</span>" : "") +
-        foto(x.img, x.nombre, i) + "</a>" +
+        foto(x.img, x.nombre, i, "", { set: x.imgSet, fb: x.imgFb, sizes: "(min-width: 420px) 290px, 72vw" }) + "</a>" +
       '<div class="pr-bd">' +
         "<h3>" + esc(x.nombre) + "</h3>" +
         (x.sub ? "<p>" + esc(x.sub) + "</p>" : "") +
@@ -1405,14 +1416,52 @@
     t = t.replace(/\./g, "").replace(",", ".");
     var v = parseFloat(t); return isNaN(v) ? 0 : v;
   }
-  function srcDe(img) {
-    if (!img) return "";
-    var s = img.getAttribute("src") || img.getAttribute("data-src") || "";
-    if ((!s || /placeholder|data:image/.test(s)) && img.getAttribute("data-srcset")) s = img.getAttribute("data-srcset").split(",")[0].trim().split(" ")[0];
-    if ((!s || /placeholder|data:image/.test(s)) && img.getAttribute("srcset")) s = img.getAttribute("srcset").split(",")[0].trim().split(" ")[0];
-    if (/placeholder|data:image/.test(s)) return "";
-    if (s.indexOf("//") === 0) s = "https:" + s;
-    return s;
+  /* Foto del producto en alta calidad. Tiendanube muestra primero una
+     miniatura borrosa y guarda las versiones buenas en srcset /
+     data-srcset. Se juntan todas las versiones de la MISMA foto y se usa
+     la más grande; el navegador elige la justa para cada pantalla. Si
+     el tema solo trae una chica, se pide la de 640 px (con respaldo). */
+  var TN_TAM = /-(\d+)-(\d+)\.(webp|jpe?g|png)(\?.*)?$/i;
+  function baseFoto(u) { return u.replace(TN_TAM, ""); }
+  function fotoDe(b) {
+    var cand = [], vistos = {}, base0 = "";
+    function add(u, w) {
+      u = String(u || "").trim();
+      if (!u || /placeholder|data:image|empty-placeholder/i.test(u)) return;
+      if (u.indexOf("//") === 0) u = "https:" + u;
+      if (!base0) base0 = baseFoto(u);
+      if (baseFoto(u) !== base0 || vistos[u]) return;
+      vistos[u] = 1;
+      if (!w) { var m = TN_TAM.exec(u); w = m ? parseInt(m[1], 10) : 0; }
+      cand.push({ u: u, w: w || 0 });
+    }
+    Array.prototype.slice.call(b.querySelectorAll("img")).forEach(function (im) {
+      if (/secondary|hover/i.test(im.className || "") && base0) return;
+      ["data-srcset", "srcset"].forEach(function (a) {
+        String(im.getAttribute(a) || "").split(",").forEach(function (p) {
+          var t = p.trim().split(/\s+/);
+          if (t[0]) add(t[0], parseInt(t[1], 10) || 0);
+        });
+      });
+      ["data-src", "src"].forEach(function (a) { add(im.getAttribute(a)); });
+    });
+    if (!cand.length) return { src: "", set: "", fb: "" };
+    cand.sort(function (a, c) { return a.w - c.w; });
+    var top = cand[cand.length - 1], src = top.u, fb = "";
+    var set = cand.filter(function (c) { return c.w >= 240; }).map(function (c) { return c.u + " " + c.w + "w"; });
+    if (top.w && top.w < 640 && TN_TAM.test(src)) {
+      fb = src;
+      src = src.replace(TN_TAM, "-640-0.$3$4");
+      set.push(src + " 640w");
+    }
+    return { src: src, set: set.join(", "), fb: fb };
+  }
+  /* Fotos de Cloudinary: formato y calidad automáticos; con "ar" se
+     recortan a esa proporción (centrando lo importante). */
+  function cldFoto(u, ar, ancho) {
+    var m = /^(https?:\/\/res\.cloudinary\.com\/[^\/]+\/image\/upload\/)(v\d+\/.+)$/.exec(u || "");
+    if (!m) return u;
+    return m[1] + "f_auto,q_auto" + (ar ? ",c_fill,g_auto,ar_" + ar : "") + (ancho ? ",w_" + ancho : "") + "/" + m[2];
   }
   function leerProductos() {
     if (!CFG.leerProductosDelTema || PREVIEW) return [];
@@ -1429,7 +1478,7 @@
 
       var nom = b.querySelector(".js-item-name, [class*='item-name'], .item-title, h2, h3");
       nom = limpiaTxt(nom ? nom.textContent : (a.getAttribute("title") || ""));
-      var img = b.querySelector("img"), src = srcDe(img);
+      var img = b.querySelector("img"), fo = fotoDe(b);
       if (!nom && img) nom = limpiaTxt(img.getAttribute("alt"));
       if (!nom) return;
 
@@ -1449,7 +1498,7 @@
       if (!/%/.test(badge) || /^0\s?%/.test(badge)) badge = "";
 
       vistos[clave] = 1;
-      out.push({ nombre: nom, precio: precio, anterior: ant, badge: badge, url: url, img: src });
+      out.push({ nombre: nom, precio: precio, anterior: ant, badge: badge, url: url, img: fo.src, imgSet: fo.set, imgFb: fo.fb });
     });
     return out;
   }
