@@ -41,7 +41,7 @@
    DONDE SE PEGA
    Se sube a tu GitHub (franxdd5/rumbis-home-nuevo) y se llama desde
    tu etiqueta de Google Tag Manager (GTM-PJ5Z8TBQ) por jsDelivr:
-   https://cdn.jsdelivr.net/gh/franxdd5/rumbis-home-nuevo@main/Codigo_Home_Rumbis.js
+   https://cdn.jsdelivr.net/gh/franxdd5/rumbis-home-nuevo@d0d05465d69b1baef5ff2531c9b6716acf575075/Codigo_Home_Rumbis.js
 
    SEGURIDAD
    · Solo se activa en la home. En producto, categoria o carrito no
